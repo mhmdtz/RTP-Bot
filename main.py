@@ -1,8 +1,9 @@
 import telebot
-import os
 import time
 
-API_TOKEN = os.environ['BOT_TOKEN']
+# توکن ربات
+API_TOKEN = "7589231796:AAFeFZ9oLsFFHSU8kqejxT4kXHQy-mDMnIc"
+
 bot = telebot.TeleBot(API_TOKEN)
 RLM = '\u200F'
 
@@ -12,12 +13,12 @@ def handle_message(message):
     try:
         bot.reply_to(message, rtl_text)
     except Exception as e:
-        print("Error sending message:", e)
+        print("خطا در ارسال پیام:", e)
 
-# اجرای ربات با تلاش مجدد
+# اجرای ربات با تلاش مجدد در صورت خطا
 while True:
     try:
         bot.polling(non_stop=True)
     except Exception as e:
-        print("Polling error:", e)
+        print("خطای polling:", e)
         time.sleep(5)
