@@ -1,45 +1,41 @@
 import telebot
-from telebot import types
 import time
 
 API_TOKEN = "7589231796:AAFeFZ9oLsFFHSU8kqejxT4kXHQy-mDMnIc"
 bot = telebot.TeleBot(API_TOKEN)
 RLM = '\u200F'
 
-# مرحله اول: دستور /start و درخواست متن
+# پاسخ به /start
 @bot.message_handler(commands=['start'])
-def send_welcome(message):
-    bot.send_message(message.chat.id, "لطفا متن خود را ارسال کنید:")
+def handle_start(message):
+    bot.reply_to(message, "لطفا متن خود را ارسال کنید")
 
-# مرحله دوم: دریافت متن و ارسال دکمه برای ارسال راست‌چین
-@bot.message_handler(func=lambda m: True)
-def get_text_and_show_button(message):
-    # متن دریافتی
-    user_text = message.text
-    # ذخیره متن در یه فیلد (برای ساده بودن اینجا داخل خود فانکشن ذخیره می‌کنیم)
-    # اگر میخوای متن رو ذخیره کنی، باید از دیتابیس یا دیکشنری استفاده کنی (اختیاری)
-    
-    # ساخت دکمه
-    markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
-    send_button = types.KeyboardButton("ارسال متن راست‌چین شده")
-    markup.add(send_button)
-    
-    # ذخیره متن به صورت ساده داخل متغیر در خود بات نیست،  
-    # پس برای نمونه، متن رو مستقیم داخل متغیر global می‌ذاریم:
-    global last_text
-    last_text = user_text
-    
-    bot.send_message(message.chat.id, "روی دکمه زیر بزن تا متن راست‌چین‌شده ارسال بشه:", reply_markup=markup)
+# پاسخ راست‌چین به همه‌ی پیام‌ها
+@bot.message_handler(func=lambda m: m.text is not None)
+def handle_message(message):
+    if message.chat.type in ['private', 'group', 'supergroup']:
+        rtl_text = RLM + message.text
+        try:
+            bot.reply_to(message, rtl_text)
+        except Exception as e:
+            print("خطا در ارسال پیام:", e)
 
-# مرحله سوم: وقتی دکمه زده شد، متن راست‌چین ارسال می‌شه
-@bot.message_handler(func=lambda m: m.text == "ارسال متن راست‌چین شده")
-def send_rtl_text(message):
-    global last_text
-    if last_text:
-        rtl_text = RLM + last_text
-        bot.send_message(message.chat.id, rtl_text)
-    else:
-        bot.send_message(message.chat.id, "متنی برای ارسال وجود ندارد. لطفا اول یک متن بفرستید.")
+# پاسخ به inline query
+@bot.inline_handler(func=lambda query: True)
+def handle_inline_query(inline_query):
+    try:
+        query_text = inline_query.query
+        if not query_text:
+            return
+        rtl_text = RLM + query_text
+        result = telebot.types.InlineQueryResultArticle(
+            id='1',
+            title="📤 ارسال متن راست‌چین",
+            input_message_content=telebot.types.InputTextMessageContent(rtl_text)
+        )
+        bot.answer_inline_query(inline_query.id, [result])
+    except Exception as e:
+        print("خطای inline:", e)
 
 # اجرای ربات با تلاش مجدد
 while True:
