@@ -1,12 +1,16 @@
 import telebot
 import time
 
-# توکن ربات
 API_TOKEN = "7589231796:AAFeFZ9oLsFFHSU8kqejxT4kXHQy-mDMnIc"
-
 bot = telebot.TeleBot(API_TOKEN)
 RLM = '\u200F'
 
+# پیام خوش‌آمد برای /start
+@bot.message_handler(commands=['start'])
+def handle_start(message):
+    bot.reply_to(message, "لطفا متن خود را ارسال کنید")
+
+# پاسخ راست‌چین به همه‌ی پیام‌ها
 @bot.message_handler(func=lambda message: True)
 def handle_message(message):
     rtl_text = RLM + message.text
@@ -15,7 +19,7 @@ def handle_message(message):
     except Exception as e:
         print("خطا در ارسال پیام:", e)
 
-# اجرای ربات با تلاش مجدد در صورت خطا
+# اجرای ربات با تلاش مجدد
 while True:
     try:
         bot.polling(non_stop=True)
