@@ -1,8 +1,9 @@
 import telebot
-import time
+from flask import Flask, request, abort
 
 API_TOKEN = "7589231796:AAFeFZ9oLsFFHSU8kqejxT4kXHQy-mDMnIc"
 bot = telebot.TeleBot(API_TOKEN)
+app = Flask(__name__)
 RLM = '\u200F'
 
 # پاسخ به /start
@@ -35,6 +36,27 @@ def handle_inline_query(inline_query):
         )
         bot.answer_inline_query(inline_query.id, [result])
     except Exception as e:
+        print("خطای inline:", e)
+
+# روت اصلی برای webhook
+@app.route('/webhook', methods=['POST'])
+def webhook():
+    if request.headers.get('content-type') == 'application/json':
+        json_string = request.get_data().decode('utf-8')
+        update = telebot.types.Update.de_json(json_string)
+        bot.process_new_updates([update])
+        return ''
+    else:
+        abort(403)
+
+@app.route('/')
+def index():
+    return 'Bot is running!'
+
+if __name__ == '__main__':
+    import os
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)    except Exception as e:
         print("خطای inline:", e)
 
 # اجرای ربات با تلاش مجدد
