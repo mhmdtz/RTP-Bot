@@ -38,7 +38,7 @@ def handle_inline_query(inline_query):
     except Exception as e:
         print("خطای inline:", e)
 
-# روت اصلی برای webhook
+# روت برای webhook
 @app.route('/webhook', methods=['POST'])
 def webhook():
     if request.headers.get('content-type') == 'application/json':
@@ -56,13 +56,4 @@ def index():
 if __name__ == '__main__':
     import os
     port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port)    except Exception as e:
-        print("خطای inline:", e)
-
-# اجرای ربات با تلاش مجدد
-while True:
-    try:
-        bot.polling(non_stop=True)
-    except Exception as e:
-        print("خطای polling:", e)
-        time.sleep(5)
+    app.run(host='0.0.0.0', port=port)
